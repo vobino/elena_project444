@@ -28,12 +28,12 @@ Future<DiaperEntry?> showDiaperSheet(BuildContext context) {
                   foregroundColor: p.diaper,
                   textStyle: const TextStyle(
                       fontSize: 20, fontWeight: FontWeight.w700),
-                ),
+                ),/*
                 icon: Icon(switch (t) {
                   DiaperType.pipi => Icons.water_drop,
                   DiaperType.caca => Icons.cloud,
                   DiaperType.mixte => Icons.all_inclusive,
-                }),
+                }),*/
                 label: Text(switch (t) {
                   DiaperType.pipi => 'Pipi',
                   DiaperType.caca => 'Caca',
@@ -107,12 +107,14 @@ class _SleepSheetState extends State<_SleepSheet> {
           const SizedBox(height: 16),
           _TimeRow(
             label: 'Début',
+            icon: Icons.bedtime_outlined,     // 🌙 on s'endort
             value: start,
             onPick: (t) => setState(() => start = t),
           ),
           const SizedBox(height: 8),
           _TimeRow(
             label: 'Fin',
+            icon: Icons.wb_sunny_outlined,    // ☀️ on se réveille
             value: end,
             optionalHint: 'En cours…',
             onPick: (t) => setState(() => end = t),
@@ -147,32 +149,44 @@ class _TimeRow extends StatelessWidget {
   final TimeOfDay? value;
   final String? optionalHint;
   final ValueChanged<TimeOfDay> onPick;
+  final IconData icon;
 
   const _TimeRow({
     required this.label,
     required this.value,
     required this.onPick,
+    required this.icon,
     this.optionalHint,
   });
+
+  Future<void> _pick(BuildContext context) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: value ?? TimeOfDay.now(),
+      initialEntryMode: TimePickerEntryMode.input,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+        child: child!,
+      ),
+    );
+    if (picked != null) onPick(picked);
+  }
 
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
     return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(Icons.bedtime_outlined, color: p.sleep),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      onTap: () => _pick(context),
+      leading: Icon(icon, color: p.sleep),
       title: Text(label),
-      trailing: TextButton(
-        onPressed: () async {
-          final picked = await showTimePicker(
-            context: context,
-            initialTime: value ?? TimeOfDay.now(),
-          );
-          if (picked != null) onPick(picked);
-        },
-        child: Text(
-          value?.format(context) ?? optionalHint ?? '--:--',
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+      trailing: Text(
+        value?.format(context) ?? optionalHint ?? '--:--',
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: value != null ? p.text : p.textMuted,
         ),
       ),
     );

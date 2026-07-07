@@ -20,7 +20,7 @@ class AppDatabase {
     final dir = await getDatabasesPath();
     return openDatabase(
       join(dir, 'bibitrack.db'),
-      version: 1,
+      version: 2,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE feedings(
@@ -46,12 +46,33 @@ class AppDatabase {
             end INTEGER,
             synced INTEGER NOT NULL DEFAULT 0
           )''');
+        await db.execute(_createBathsTable);
         await db.execute('CREATE INDEX idx_feedings_at ON feedings(at DESC)');
         await db.execute('CREATE INDEX idx_diapers_at ON diapers(at DESC)');
         await db.execute('CREATE INDEX idx_sleeps_start ON sleeps(start DESC)');
+        await db.execute(_createBathsIndex);
+      },
+      // Migration des installations existantes (base déjà en v1).
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(_createBathsTable);
+          await db.execute(_createBathsIndex);
+        }
       },
     );
   }
+
+  static const _createBathsTable = '''
+    CREATE TABLE baths(
+      id TEXT PRIMARY KEY,
+      at INTEGER NOT NULL,
+      type TEXT NOT NULL,
+      notes TEXT,
+      synced INTEGER NOT NULL DEFAULT 0
+    )''';
+
+  static const _createBathsIndex =
+      'CREATE INDEX idx_baths_at ON baths(at DESC)';
 
   // ---------- Feedings ----------
   Future<void> insertFeeding(FeedingEntry e) async =>
@@ -66,7 +87,7 @@ class AppDatabase {
 
   Future<FeedingEntry?> lastFeeding() async {
     final rows =
-        await (await db).query('feedings', orderBy: 'at DESC', limit: 1);
+    await (await db).query('feedings', orderBy: 'at DESC', limit: 1);
     return rows.isEmpty ? null : FeedingEntry.fromMap(rows.first);
   }
 
@@ -80,7 +101,7 @@ class AppDatabase {
 
   Future<List<DiaperEntry>> diapers({int limit = 200}) async {
     final rows =
-        await (await db).query('diapers', orderBy: 'at DESC', limit: limit);
+    await (await db).query('diapers', orderBy: 'at DESC', limit: limit);
     return rows.map(DiaperEntry.fromMap).toList();
   }
 
@@ -94,7 +115,7 @@ class AppDatabase {
 
   Future<List<SleepEntry>> sleeps({int limit = 200}) async {
     final rows =
-        await (await db).query('sleeps', orderBy: 'start DESC', limit: limit);
+    await (await db).query('sleeps', orderBy: 'start DESC', limit: limit);
     return rows.map(SleepEntry.fromMap).toList();
   }
 
@@ -108,16 +129,38 @@ class AppDatabase {
   Future<void> deleteSleep(String id) async =>
       (await db).delete('sleeps', where: 'id = ?', whereArgs: [id]);
 
+  // ---------- Baths ----------
+  Future<void> insertBath(BathEntry e) async =>
+      (await db).insert('baths', e.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+
+  Future<List<BathEntry>> baths({int limit = 200}) async {
+    final rows =
+    await (await db).query('baths', orderBy: 'at DESC', limit: limit);
+    return rows.map(BathEntry.fromMap).toList();
+  }
+
+  Future<BathEntry?> lastBath() async {
+    final rows =
+    await (await db).query('baths', orderBy: 'at DESC', limit: 1);
+    return rows.isEmpty ? null : BathEntry.fromMap(rows.first);
+  }
+
+  Future<void> deleteBath(String id) async =>
+      (await db).delete('baths', where: 'id = ?', whereArgs: [id]);
+
   // ---------- Sync ----------
   Future<Map<String, List<Map<String, dynamic>>>> unsyncedPayload() async {
     final d = await db;
     final f = await d.query('feedings', where: 'synced = 0');
     final di = await d.query('diapers', where: 'synced = 0');
     final s = await d.query('sleeps', where: 'synced = 0');
+    final b = await d.query('baths', where: 'synced = 0');
     return {
       'feedings': f.map((m) => FeedingEntry.fromMap(m).toJson()).toList(),
       'diapers': di.map((m) => DiaperEntry.fromMap(m).toJson()).toList(),
       'sleeps': s.map((m) => SleepEntry.fromMap(m).toJson()).toList(),
+      'baths': b.map((m) => BathEntry.fromMap(m).toJson()).toList(),
     };
   }
 
@@ -126,5 +169,6 @@ class AppDatabase {
     await d.update('feedings', {'synced': 1});
     await d.update('diapers', {'synced': 1});
     await d.update('sleeps', {'synced': 1});
+    await d.update('baths', {'synced': 1});
   }
 }

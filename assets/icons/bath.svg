@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+  <g transform="rotate(-8 12 15)">
+    <circle cx="6.3" cy="10" r="1.4"/>
+    <circle cx="9" cy="9.2" r="1.8"/>
+    <circle cx="11.9" cy="9.6" r="1.6"/>
+    <circle cx="14.5" cy="9" r="1.7"/>
+    <circle cx="17.2" cy="10" r="1.3"/>
+    <rect x="3.4" y="11.3" width="17.2" height="1.7" rx=".85"/>
+    <path d="M4.6 13.4h14.8c-.3 3.8-3.2 6.5-7.4 6.5s-7.1-2.7-7.4-6.5z"/>
+  </g>
+  <path fill-rule="evenodd" d="M10.75 3.6a1.25 1.25 0 1 0 2.5 0 1.25 1.25 0 1 0-2.5 0zm.55 0a.7.7 0 1 1 1.4 0 .7.7 0 1 1-1.4 0z"/>
+  <path fill-rule="evenodd" d="M18.8 5.3a1 1 0 1 0 2 0 1 1 0 1 0-2 0zm.45 0a.55.55 0 1 1 1.1 0 .55.55 0 1 1-1.1 0z"/>
+  <path fill-rule="evenodd" d="M3.35 5.9a.85.85 0 1 0 1.7 0 .85.85 0 1 0-1.7 0zm.4 0a.45.45 0 1 1 .9 0 .45.45 0 1 1-.9 0z"/>
+  <circle cx="7.4" cy="4.2" r=".55"/>
+  <circle cx="16.6" cy="2.8" r=".6"/>
+  <circle cx="21.8" cy="8.6" r=".5"/>
+  <circle cx="2.4" cy="9.2" r=".45"/>
+</svg>

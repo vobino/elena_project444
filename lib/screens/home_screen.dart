@@ -13,6 +13,7 @@ import '../widgets/hero_card.dart';
 import '../widgets/theme_toggle_button.dart';
 import '../widgets/diaper_sleep_sheets.dart';
 import '../widgets/feeding_sheet.dart';
+import '../widgets/bath_sheet.dart';
 import 'chat_screen.dart' show ChatScreen;
 import 'history_screen.dart';
 import 'settings_screen.dart';
@@ -29,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late bool fatigueMode;
   DateTime? nextFeedingAt;
   SleepEntry? ongoingSleep;
+  BathEntry? lastBath;
   bool _notifying = false;
 
   @override
@@ -42,10 +44,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _refresh() async {
     final last = await _db.lastFeeding();
     final sleep = await _db.ongoingSleep();
+    final bath = await _db.lastBath();
     if (!mounted) return;
     setState(() {
       nextFeedingAt = last?.nextAt;
       ongoingSleep = sleep;
+      lastBath = bath;
     });
   }
 
@@ -163,9 +167,33 @@ class _HomeScreenState extends State<HomeScreen> {
     SyncService.instance.pushPending();
   }
 
-  // ---------- Mesures (à brancher quand le sheet existera) ----------
-  Future<void> _onMeasure() async {
-    _toast('Mesures : bientôt disponible');
+  // ---------- Bain / Rinçage du bébé ----------
+  Future<void> _onBath() async {
+    if (fatigueMode) {
+      final entry = BathEntry(at: DateTime.now(), type: BathType.bain);
+      await _db.insertBath(entry);
+      _toast('Bain enregistré 🛁', onUndo: () async {
+        await _db.deleteBath(entry.id);
+        _refresh();
+      });
+    } else {
+      final entry = await showBathSheet(context);
+      if (entry == null) return;
+      await _db.insertBath(entry);
+      _toast('Enregistré ✓');
+    }
+    _refresh();
+    SyncService.instance.pushPending();
+  }
+
+  String? _bathSubtitle() {
+    final b = lastBath;
+    if (b == null) return null;
+    final diff = DateTime.now().difference(b.at);
+    final prefix = b.type == BathType.rincage ? 'Rinçage' : 'Bain';
+    if (diff.inDays >= 1) return '$prefix il y a ${diff.inDays}j';
+    if (diff.inHours >= 1) return '$prefix il y a ${diff.inHours}h';
+    return '$prefix il y a ${diff.inMinutes}min';
   }
 
   // Sous-titre du bouton biberon = compte à rebours prochain repas.
@@ -318,11 +346,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: _onDiaper,
                       ),
                       ActionCard(
-                        label: 'Mesures',
-                        iconAsset: 'assets/icons/ruler.svg',
+                        label: 'Bain',
+                        subtitle: _bathSubtitle(),
+                        iconAsset: 'assets/icons/bath.svg',
                         gradient: p.measureGradient,
                         glowColor: p.measure,
-                        onTap: _onMeasure,
+                        onTap: _onBath,
                       ),
                     ],
                   ),
