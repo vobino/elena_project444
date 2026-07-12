@@ -35,7 +35,7 @@ class ThemeToggleButton extends StatelessWidget {
                 ),
               ),
               child: Icon(
-                isDark ? Icons.nightlight_round : Icons.wb_sunny_rounded,
+                isDark ? Icons.nights_stay_rounded : Icons.wb_sunny_rounded,
                 key: ValueKey<bool>(isDark),
                 color: accent,
                 size: 22,

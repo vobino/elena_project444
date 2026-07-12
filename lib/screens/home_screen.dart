@@ -207,28 +207,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return h > 0 ? 'dans ${h}h ${m}m' : 'dans ${m}m';
   }
 
-  // Valeurs de la hero card.
-  ({String value, String? sub}) _heroData() {
-    final next = nextFeedingAt;
-    if (next == null) {
-      return (value: '—', sub: 'Aucun repas encodé');
-    }
-    final fmt = DateFormat.Hm();
-    final diff = next.difference(DateTime.now());
-    if (diff.isNegative) {
-      return (value: fmt.format(next), sub: "C'est l'heure du biberon");
-    }
-    final h = diff.inHours;
-    final m = diff.inMinutes % 60;
-    final sub = h > 0 ? 'dans ${h}h ${m}m' : 'dans ${m}m';
-    return (value: fmt.format(next), sub: sub);
-  }
-
   @override
   Widget build(BuildContext context) {
     final p = context.palette;
     final fmt = DateFormat.Hm();
-    final hero = _heroData();
     final isDark = p.brightness == Brightness.dark;
     final greeting = isDark ? 'Bonsoir ✨' : 'Bonjour ✨';//🌊
     final childName = AppSettings.instance.childName;
@@ -307,8 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  HeroCard(
-                      title: 'PROCHAIN REPAS', value: hero.value, sub: hero.sub),
+                  HeroCard(nextFeedingAt: nextFeedingAt),
                   const SizedBox(height: 18),
 
                   // ── Grille 2×2 des actions principales ──
@@ -340,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ActionCard(
                         label: 'Couche',
                         subtitle: fatigueMode ? '1 tap' : null,
-                        iconAsset: 'assets/icons/diaper.svg',
+                        iconAsset: 'assets/icons/change_rouleau.svg',
                         gradient: p.diaperGradient,
                         glowColor: p.diaper,
                         onTap: _onDiaper,

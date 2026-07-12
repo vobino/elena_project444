@@ -25,7 +25,7 @@ class ActionCard extends StatelessWidget {
   final Color glowColor;
   final VoidCallback onTap;
 
-  /// Chemin d'un SVG monochrome, ex. 'assets/icons/baby_bottle.svg'.
+  /// Chemin d'un SVG monochrome, ex. 'assets/icons/baby_bottle.svg.bak'.
   final String? iconAsset;
 
   /// Alternative Material si pas de SVG dispo.
@@ -39,11 +39,11 @@ class ActionCard extends StatelessWidget {
     final Widget iconWidget = iconAsset != null
         ? SvgPicture.asset(
       iconAsset!,
-      width: 44,
-      height: 44,
+      width: 62,
+      height: 62,
       colorFilter: ColorFilter.mode(p.onAccent, BlendMode.srcIn),
     )
-        : Icon(icon, size: 44, color: p.onAccent);
+        : Icon(icon, size: 62, color: p.onAccent);
 
     return DecoratedBox(
       decoration: BoxDecoration(
