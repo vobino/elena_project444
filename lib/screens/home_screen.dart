@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../data/app_database.dart';
 import '../data/app_settings.dart';
+import '../data/family_prefs.dart';
 import '../models/entries.dart';
 import '../services/sync_service.dart';
 import '../theme.dart';
@@ -17,6 +18,7 @@ import '../widgets/bath_sheet.dart';
 import 'chat_screen.dart' show ChatScreen;
 import 'history_screen.dart';
 import 'settings_screen.dart';
+import 'family_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -353,9 +355,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         label: 'Tchat',
                         icon: Icons.forum,
                         color: p.chat,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const ChatScreen()),
-                        ),
+                        onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => FamilyPrefs.instance.hasFamily
+                              ? const ChatScreen()
+                              : const FamilyScreen(),
+                        )),
                       ),
                       const SizedBox(width: 12),
                       _SecondaryButton(

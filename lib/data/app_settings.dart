@@ -54,7 +54,7 @@ class AppSettings {
 
   // URL du backend Spring Boot.
   String get apiBaseUrl =>
-      _prefs.getString('api_base_url') ?? 'https://api.example.com';
+      _prefs.getString('api_base_url') ?? 'http://localhost:8080';
   Future<void> setApiBaseUrl(String v) => _prefs.setString('api_base_url', v);
 
   // Voile de luminosité de l'accueil (0 = aucun voile, 0.8 = très sombre)

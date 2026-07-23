@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'data/app_settings.dart';
+import 'data/family_prefs.dart';
 import 'screens/home_screen.dart';
 import 'theme.dart';
 
@@ -9,6 +10,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('fr');
   await AppSettings.load();
+  await FamilyPrefs.instance.load();
+  //await FamilyPrefs.instance.leaveFamily();
   runApp(const BibiTrackApp());
 }
 
